@@ -65,6 +65,7 @@ This guide will help you set up Google Sheets integration for your partnership l
 
 ## Step 7: Configure Environment Variables
 
+### For Local Development:
 Create a `.env.local` file in your project root with the following variables:
 
 ```env
@@ -77,13 +78,39 @@ GOOGLE_CLIENT_EMAIL=your_service_account_email@your-project.iam.gserviceaccount.
 GOOGLE_CLIENT_ID=your_client_id_here
 ```
 
+### For Vercel Deployment:
+1. Go to your Vercel project dashboard
+2. Navigate to Settings > Environment Variables
+3. Add the following environment variables:
+
+```
+GOOGLE_SHEET_ID = your_spreadsheet_id_here
+GOOGLE_PROJECT_ID = your_project_id_here
+GOOGLE_PRIVATE_KEY_ID = your_private_key_id_here
+GOOGLE_PRIVATE_KEY = -----BEGIN PRIVATE KEY-----\nyour_private_key_here\n-----END PRIVATE KEY-----\n
+GOOGLE_CLIENT_EMAIL = your_service_account_email@your-project.iam.gserviceaccount.com
+GOOGLE_CLIENT_ID = your_client_id_here
+```
+
+**Important for Vercel:**
+- For `GOOGLE_PRIVATE_KEY`, paste the entire private key including the `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----` lines
+- Make sure to include the newlines (`\n`) in the private key
+- Do NOT wrap the private key in quotes in Vercel's environment variables
+
 Replace the values with the actual values from your downloaded JSON file.
 
 ## Step 8: Test the Integration
 
+### Local Testing:
 1. Start your development server: `npm run dev`
 2. Try adding a transaction through your app
 3. Check your Google Sheet to see if the data appears
+
+### Vercel Deployment:
+1. After setting up environment variables in Vercel, redeploy your app
+2. Test the live deployment by adding a transaction
+3. Check your Google Sheet to verify data is being saved
+4. Monitor Vercel function logs for any errors
 
 ## Troubleshooting
 
@@ -103,6 +130,15 @@ Replace the values with the actual values from your downloaded JSON file.
 
 4. **"API not enabled"**
    - Go back to Google Cloud Console and make sure Google Sheets API is enabled
+
+5. **"EROFS: read-only file system" (Vercel)**
+   - This is expected on Vercel - the app will only use Google Sheets, not JSON files
+   - Make sure your Google Sheets credentials are properly configured
+
+6. **"DECODER routines::unsupported" (Vercel)**
+   - Check that your `GOOGLE_PRIVATE_KEY` environment variable is set correctly
+   - Make sure the private key includes the full key with proper newlines
+   - Don't wrap the private key in quotes in Vercel's environment variables
 
 ## Security Notes
 

@@ -5,7 +5,7 @@ import path from 'path';
 
 const DATA_FILE = path.join(process.cwd(), 'partnership-ledger-data.json');
 
-// Load data from Google Sheets or fallback to JSON
+// Load data from Google Sheets or fallback to JSON (only in development)
 async function loadData() {
     try {
         // Try Google Sheets first
@@ -14,10 +14,21 @@ async function loadData() {
             return sheetsData;
         }
         
-        // Fallback to JSON file
-        console.log('Falling back to JSON file');
-        const data = await fs.readFile(DATA_FILE, 'utf8');
-        return JSON.parse(data);
+        // Only fallback to JSON file in development (not on Vercel)
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Falling back to JSON file (development mode)');
+            const data = await fs.readFile(DATA_FILE, 'utf8');
+            return JSON.parse(data);
+        }
+        
+        // In production, return empty data if Google Sheets fails
+        console.log('Google Sheets not configured, returning empty data');
+        return {
+            transactions: [],
+            nextId: 1,
+            lastUpdated: new Date().toISOString(),
+            version: "1.0"
+        };
     } catch (error) {
         console.error('Error loading data:', error);
         // Return default structure if there's an error
@@ -30,7 +41,7 @@ async function loadData() {
     }
 }
 
-// Save data to Google Sheets or fallback to JSON
+// Save data to Google Sheets or fallback to JSON (only in development)
 async function saveData(data: any) {
     try {
         data.lastUpdated = new Date().toISOString();
@@ -41,10 +52,16 @@ async function saveData(data: any) {
             return true;
         }
         
-        // Fallback to JSON file
-        console.log('Falling back to JSON file for save');
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        return true;
+        // Only fallback to JSON file in development (not on Vercel)
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Falling back to JSON file for save (development mode)');
+            await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+            return true;
+        }
+        
+        // In production, return false if Google Sheets fails
+        console.log('Google Sheets save failed, no fallback available in production');
+        return false;
     } catch (error) {
         console.error('Error saving data:', error);
         return false;

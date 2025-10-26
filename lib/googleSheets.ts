@@ -20,6 +20,23 @@ const credentials = {
   client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.GOOGLE_CLIENT_EMAIL}`,
 };
 
+// Validate credentials
+function validateCredentials() {
+  if (!process.env.GOOGLE_SHEET_ID) {
+    console.log('GOOGLE_SHEET_ID not set');
+    return false;
+  }
+  if (!process.env.GOOGLE_CLIENT_EMAIL) {
+    console.log('GOOGLE_CLIENT_EMAIL not set');
+    return false;
+  }
+  if (!process.env.GOOGLE_PRIVATE_KEY) {
+    console.log('GOOGLE_PRIVATE_KEY not set');
+    return false;
+  }
+  return true;
+}
+
 // Authenticate with Google Sheets
 const auth = new google.auth.GoogleAuth({
   credentials,
@@ -105,7 +122,7 @@ function transactionToRow(transaction: Transaction): any[] {
 export async function loadDataFromSheets(): Promise<LedgerData> {
   try {
     // Check if Google Sheets is configured
-    if (!SPREADSHEET_ID || !process.env.GOOGLE_CLIENT_EMAIL) {
+    if (!validateCredentials()) {
       console.log('Google Sheets not configured, falling back to default data');
       return {
         transactions: [],
@@ -155,7 +172,7 @@ export async function loadDataFromSheets(): Promise<LedgerData> {
 export async function saveDataToSheets(data: LedgerData): Promise<boolean> {
   try {
     // Check if Google Sheets is configured
-    if (!SPREADSHEET_ID || !process.env.GOOGLE_CLIENT_EMAIL) {
+    if (!validateCredentials()) {
       console.log('Google Sheets not configured, skipping save');
       return false;
     }
@@ -212,7 +229,7 @@ export async function saveDataToSheets(data: LedgerData): Promise<boolean> {
 export async function addTransactionToSheets(transaction: Transaction): Promise<boolean> {
   try {
     // Check if Google Sheets is configured
-    if (!SPREADSHEET_ID || !process.env.GOOGLE_CLIENT_EMAIL) {
+    if (!validateCredentials()) {
       console.log('Google Sheets not configured, skipping add transaction');
       return false;
     }
@@ -242,7 +259,7 @@ export async function addTransactionToSheets(transaction: Transaction): Promise<
 export async function updateTransactionInSheets(transaction: Transaction): Promise<boolean> {
   try {
     // Check if Google Sheets is configured
-    if (!SPREADSHEET_ID || !process.env.GOOGLE_CLIENT_EMAIL) {
+    if (!validateCredentials()) {
       console.log('Google Sheets not configured, skipping update transaction');
       return false;
     }
