@@ -38,6 +38,9 @@ export default function Home() {
   });
   const [filterType, setFilterType] = useState('');
   const [filterPartner, setFilterPartner] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -51,6 +54,7 @@ export default function Home() {
 
   const loadData = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/data');
       if (response.ok) {
         const data = await response.json();
@@ -59,11 +63,16 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const addTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmitting) return;
     
     // Validate amount
     const amount = Number(formData.amount);
@@ -73,6 +82,7 @@ export default function Home() {
     }
     
     try {
+      setIsSubmitting(true);
       const transactionData = {
         ...formData,
         amount: amount
@@ -98,15 +108,22 @@ export default function Home() {
           amount: ''
         });
         setDefaultDate();
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error || 'Failed to add transaction'}`);
       }
     } catch (error) {
       console.error('Error adding transaction:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const deleteTransaction = async (id: number) => {
     if (confirm('Are you sure you want to delete this transaction?')) {
       try {
+        setIsDeleting(id);
         const response = await fetch(`/api/transaction/${id}`, {
           method: 'DELETE'
         });
@@ -116,9 +133,15 @@ export default function Home() {
           setTransactions(prev => 
             prev.map(t => t.id === id ? { ...t, ...result.transaction } : t)
           );
+        } else {
+          const errorData = await response.json();
+          alert(`Error: ${errorData.error || 'Failed to delete transaction'}`);
         }
       } catch (error) {
         console.error('Error deleting transaction:', error);
+        alert('Network error. Please try again.');
+      } finally {
+        setIsDeleting(null);
       }
     }
   };
@@ -244,6 +267,7 @@ export default function Home() {
                     id="date"
                     value={formData.date}
                     onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                    disabled={isSubmitting}
                     required
                   />
                 </div>
@@ -253,6 +277,7 @@ export default function Home() {
                     id="type"
                     value={formData.type}
                     onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+                    disabled={isSubmitting}
                     required
                   >
                     <option value="">Select Type</option>
@@ -271,6 +296,7 @@ export default function Home() {
                     id="partner"
                     value={formData.partner}
                     onChange={(e) => setFormData(prev => ({ ...prev, partner: e.target.value }))}
+                    disabled={isSubmitting}
                     required
                   >
                     <option value="">Select Partner</option>
@@ -288,6 +314,7 @@ export default function Home() {
                     min="0"
                     value={formData.amount}
                     onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                    disabled={isSubmitting}
                     required
                   />
                 </div>
@@ -301,11 +328,18 @@ export default function Home() {
                   placeholder="Enter transaction description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  disabled={isSubmitting}
                   required
                 />
               </div>
               
-              <button type="submit" className={styles.btnPrimary}>Add Transaction</button>
+              <button 
+                type="submit" 
+                className={styles.btnPrimary}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Adding Transaction...' : 'Add Transaction'}
+              </button>
             </form>
           </section>
 
@@ -416,7 +450,12 @@ export default function Home() {
             </div>
             
             <div className={styles.transactionsList}>
-              {filteredTransactions.length === 0 ? (
+              {isLoading ? (
+                <div className={styles.loadingState}>
+                  <div className={styles.spinner}></div>
+                  <p>Loading transactions from Google Sheets...</p>
+                </div>
+              ) : filteredTransactions.length === 0 ? (
                 <div className={styles.emptyState}>
                   <h3>No transactions found</h3>
                   <p>Add your first transaction using the form above</p>
@@ -444,9 +483,10 @@ export default function Home() {
                       <button
                         className={styles.deleteBtn}
                         onClick={() => deleteTransaction(transaction.id)}
+                        disabled={isDeleting === transaction.id}
                         style={{ display: 'none' }}
                       >
-                        ×
+                        {isDeleting === transaction.id ? 'Deleting...' : '×'}
                       </button>
                     </div>
                   ))

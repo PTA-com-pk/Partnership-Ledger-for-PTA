@@ -100,8 +100,14 @@
     transition: background-color 0.2s ease;
 }
 
-.btnPrimary:hover {
+.btnPrimary:hover:not(:disabled) {
     background: #1f2937;
+}
+
+.btnPrimary:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 /* Summary Section */
@@ -354,4 +360,49 @@
 
 .transactionsList::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* Loading States */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #374151;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loadingState p {
+    margin: 0;
+    font-size: 16px;
+    color: #6b7280;
+}
+
+/* Disabled form elements */
+.formGroup input:disabled,
+.formGroup select:disabled {
+    background: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.deleteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

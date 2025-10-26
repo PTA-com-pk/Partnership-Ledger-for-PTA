@@ -25,9 +25,22 @@
       "updatedAt": "2025-10-26T07:57:39.389Z",
       "createdTimestamp": 1761465459389,
       "updatedTimestamp": 1761465459389
+    },
+    {
+      "date": "2025-10-08",
+      "type": "Expense",
+      "partner": "Both",
+      "description": "labour for demolishing of washroom",
+      "amount": 5000,
+      "id": 3,
+      "deleted": false,
+      "createdAt": "2025-10-26T09:46:38.672Z",
+      "updatedAt": "2025-10-26T09:46:38.672Z",
+      "createdTimestamp": 1761471998672,
+      "updatedTimestamp": 1761471998672
     }
   ],
-  "nextId": 3,
-  "lastUpdated": "2025-10-26T07:57:39.390Z",
+  "nextId": 4,
+  "lastUpdated": "2025-10-26T09:46:38.672Z",
   "version": "1.0"
 }
